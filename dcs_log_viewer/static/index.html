@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DCS Log Viewer</title>
+  <meta name="description" content="Real-time log visualizer for Digital Combat Simulator — stream, filter and search dcs.log in your browser." />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Top bar ──────────────────────────────────────────────────────────── -->
+  <header id="topbar">
+    <!-- Brand -->
+    <div class="brand">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f6ef7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      DCS Log Viewer
+    </div>
+
+    <!-- Connection status -->
+    <div id="status-indicator">
+      <span id="status-dot" class="dot dot-err"></span>
+      <span id="status-text">Connecting…</span>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Log file path -->
+    <div id="path-row">
+      <input
+        type="text"
+        id="path-input"
+        placeholder="Path to dcs.log  e.g. C:\Users\You\Saved Games\DCS\Logs\dcs.log"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Log file path"
+      />
+      <button id="browse-btn" title="Browse for dcs.log">📁 Browse</button>
+      <button id="path-btn" class="primary">Load</button>
+      <button id="reload-btn" title="Re-read file from start">↺ Reload</button>
+    </div>
+
+    <!-- Right-side controls -->
+    <div class="spacer"></div>
+    <button id="theme-btn" title="Toggle light / dark mode">☀ Light</button>
+  </header>
+
+  <!-- ── Filter toolbar ───────────────────────────────────────────────────── -->
+  <div id="toolbar" role="toolbar" aria-label="Log filters">
+    <!-- Text search -->
+    <input
+      type="text"
+      id="search-input"
+      placeholder="🔍 Search…"
+      aria-label="Search log entries"
+      autocomplete="off"
+      spellcheck="false"
+    />
+
+    <!-- Level filter pills -->
+    <div class="level-pills" role="group" aria-label="Level filter">
+      <label class="level-pill pill-error">
+        <input type="checkbox" class="level-chk" value="ERROR" /> ERROR
+        <span id="cnt-error" class="stat-num">0</span>
+      </label>
+      <label class="level-pill pill-warn">
+        <input type="checkbox" class="level-chk" value="WARN" /> WARN
+        <span id="cnt-warn" class="stat-num">0</span>
+      </label>
+      <label class="level-pill pill-info">
+        <input type="checkbox" class="level-chk" value="INFO" /> INFO
+        <span id="cnt-info" class="stat-num">0</span>
+      </label>
+      <label class="level-pill pill-debug">
+        <input type="checkbox" class="level-chk" value="DEBUG" /> DEBUG
+        <span id="cnt-debug" class="stat-num">0</span>
+      </label>
+      <label class="level-pill pill-trace">
+        <input type="checkbox" class="level-chk" value="TRACE" /> TRACE
+        <span id="cnt-trace" class="stat-num">0</span>
+      </label>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Category filter -->
+    <select id="category-select" aria-label="Filter by category">
+      <option value="">All categories</option>
+    </select>
+
+    <div class="spacer"></div>
+
+    <!-- Auto-scroll toggle -->
+    <label class="toggle-label" title="Auto-scroll to newest entries">
+      <input type="checkbox" id="autoscroll-chk" checked />
+      <span class="toggle-track"></span>
+      Auto-scroll
+    </label>
+
+    <div class="sep"></div>
+
+    <!-- Clear view -->
+    <button id="clear-btn" class="danger" title="Clear the current view (does not affect the file)">✕ Clear</button>
+  </div>
+
+  <!-- ── Stats bar ─────────────────────────────────────────────────────────── -->
+  <div id="statsbar" aria-live="polite" aria-label="Log statistics">
+    <span class="stat-pill">
+      Total: <span id="stat-total" class="stat-num">0</span>
+    </span>
+  </div>
+
+  <!-- ── Log grid ──────────────────────────────────────────────────────────── -->
+  <main id="grid-container" tabindex="0" aria-label="Log entries">
+    <!-- Empty state shown before any file is loaded -->
+    <div id="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+      </svg>
+      <p>Enter a path to <strong>dcs.log</strong> above and click <strong>Load</strong></p>
+      <p style="font-size:11px;opacity:.6">Default: <code>%USERPROFILE%\Saved Games\DCS\Logs\dcs.log</code></p>
+    </div>
+  </main>
+
+</div>
+
+<!-- ES Modules — no bundler required -->
+<script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

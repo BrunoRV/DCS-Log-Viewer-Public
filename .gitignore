@@ -1,0 +1,43 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+wheels/
+
+# ── uv / pip ──────────────────────────────────────────────────────────────────
+.venv/
+venv/
+.uv/
+uv.lock
+pip-wheel-metadata/
+
+# ── IDEs ──────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.cursor/
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Project-specific ──────────────────────────────────────────────────────────
+# Live DCS log files — never commit real logs
+dcs.log
+*.log
+
+# User config persisted by the app at runtime
+config.json
+
+# Log sample kept intentionally — do NOT ignore:
+!dcs.log.example

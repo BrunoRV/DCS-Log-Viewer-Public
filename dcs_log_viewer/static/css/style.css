@@ -1,0 +1,399 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   DCS Log Viewer — style.css
+   Design: dark-first, monospaced data grid, Logcat-style level badges.
+   Theme toggling uses [data-theme="light"] on <html>.
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Google Font ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap');
+
+/* ── Design tokens ───────────────────────────────────────────────────────── */
+:root {
+  --font-mono : 'JetBrains Mono', 'Fira Code', monospace;
+  --font-ui   : 'Inter', system-ui, sans-serif;
+
+  /* Dark palette */
+  --bg-app    : #0d0f14;
+  --bg-panel  : #13161e;
+  --bg-row    : #13161e;
+  --bg-row-alt: #161921;
+  --bg-row-hov: #1d2130;
+  --bg-input  : #1a1e2b;
+  --border    : #252a3a;
+  --border-focus: #4f6ef7;
+
+  --text-pri  : #e2e6f0;
+  --text-sec  : #7b8299;
+  --text-dim  : #4a5168;
+
+  --accent    : #4f6ef7;
+  --accent-glow: rgba(79,110,247,0.25);
+
+  /* Level colours */
+  --c-error   : #ff5f6e;
+  --c-error-bg: rgba(255,95,110,0.12);
+  --c-warn    : #ffba5a;
+  --c-warn-bg : rgba(255,186,90,0.10);
+  --c-info    : #58b4ff;
+  --c-info-bg : transparent;
+  --c-debug   : #7b8299;
+  --c-debug-bg: transparent;
+  --c-trace   : #4a5168;
+  --c-trace-bg: transparent;
+
+  --row-height: 22px;
+  --radius    : 6px;
+  --radius-sm : 4px;
+  --shadow    : 0 2px 16px rgba(0,0,0,0.5);
+  --transition: 150ms ease;
+}
+
+[data-theme="light"] {
+  --bg-app    : #f0f2f8;
+  --bg-panel  : #ffffff;
+  --bg-row    : #ffffff;
+  --bg-row-alt: #f7f8fc;
+  --bg-row-hov: #eef1fb;
+  --bg-input  : #f0f2f8;
+  --border    : #d4d8e8;
+  --border-focus: #4f6ef7;
+
+  --text-pri  : #1a1e2b;
+  --text-sec  : #5a6180;
+  --text-dim  : #9aa0b8;
+
+  --c-error-bg: rgba(255,95,110,0.08);
+  --c-warn-bg : rgba(255,186,90,0.08);
+  --c-info-bg : transparent;
+  --shadow    : 0 2px 8px rgba(0,0,0,0.10);
+}
+
+/* ── Reset & base ────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg-app);
+  color: var(--text-pri);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────────── */
+#topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  color: var(--text-pri);
+}
+.brand svg { flex-shrink: 0; }
+
+#status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-sec);
+  white-space: nowrap;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-ok  { background: #50fa7b; box-shadow: 0 0 6px #50fa7b80; }
+.dot-err { background: var(--c-error); box-shadow: 0 0 6px var(--c-error); animation: pulse 1.2s infinite; }
+@keyframes pulse { 0%,100%{ opacity:1 } 50%{ opacity:0.4 } }
+
+/* path row */
+#path-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 200px;
+}
+
+/* ── Toolbar (second row) ────────────────────────────────────────────────── */
+#toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* ── Inputs / buttons shared ─────────────────────────────────────────────── */
+input[type="text"], select {
+  background: var(--bg-input);
+  color: var(--text-pri);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+input[type="text"]:focus, select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+input[type="text"]::placeholder { color: var(--text-dim); }
+
+#path-input { flex: 1; font-size: 11px; }
+#search-input { width: 200px; }
+#category-select { max-width: 160px; }
+
+button {
+  background: var(--bg-input);
+  color: var(--text-pri);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+  white-space: nowrap;
+}
+button:hover { background: var(--bg-row-hov); border-color: var(--accent); }
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+button.primary:hover { filter: brightness(1.15); }
+button.danger:hover  { border-color: var(--c-error); color: var(--c-error); }
+
+/* ── Level checkboxes custom pill row ────────────────────────────────────── */
+.level-pills {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.level-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  transition: all var(--transition);
+  user-select: none;
+}
+.level-pill input[type="checkbox"] { display: none; }
+.level-pill.pill-error  { color: var(--c-error); }
+.level-pill.pill-warn   { color: var(--c-warn); }
+.level-pill.pill-info   { color: var(--c-info); }
+.level-pill.pill-debug  { color: var(--c-debug); }
+.level-pill.pill-trace  { color: var(--c-trace); }
+
+.level-pill:has(input:checked) { border-color: currentColor; background: var(--bg-row-hov); }
+.level-pill:hover { background: var(--bg-row-hov); }
+
+/* ── Auto-scroll toggle ──────────────────────────────────────────────────── */
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
+  color: var(--text-sec);
+}
+.toggle-label input { display: none; }
+.toggle-track {
+  width: 32px; height: 17px;
+  background: var(--border);
+  border-radius: 9px;
+  position: relative;
+  transition: background var(--transition);
+  flex-shrink: 0;
+}
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 13px; height: 13px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform var(--transition);
+}
+.toggle-label input:checked ~ .toggle-track { background: var(--accent); }
+.toggle-label input:checked ~ .toggle-track::after { transform: translateX(15px); }
+
+/* ── Stats bar ───────────────────────────────────────────────────────────── */
+#statsbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 3px 12px;
+  background: var(--bg-app);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-sec);
+  flex-shrink: 0;
+}
+.stat-pill { display: flex; align-items: center; gap: 4px; }
+.stat-num  { font-weight: 600; font-family: var(--font-mono); }
+.stat-pill.error .stat-num { color: var(--c-error); }
+.stat-pill.warn  .stat-num { color: var(--c-warn); }
+.stat-pill.info  .stat-num { color: var(--c-info); }
+.stat-pill.debug .stat-num { color: var(--c-debug); }
+.stat-pill.trace .stat-num { color: var(--c-trace); }
+
+/* ── Grid container ──────────────────────────────────────────────────────── */
+#grid-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  position: relative;
+  background: var(--bg-app);
+  scroll-behavior: auto;  /* instant scroll for auto-scroll */
+}
+#grid-container::-webkit-scrollbar { width: 6px; height: 6px; }
+#grid-container::-webkit-scrollbar-track { background: transparent; }
+#grid-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+#grid-container::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+.grid-spacer { pointer-events: none; }
+.grid-rows   { position: absolute; top: 0; left: 0; width: 100%; }
+
+/* ── Log rows ────────────────────────────────────────────────────────────── */
+.row {
+  position: absolute;
+  left: 0; right: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  height: var(--row-height);
+  padding: 0 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: var(--row-height);
+  white-space: nowrap;
+  overflow: hidden;
+  border-bottom: 1px solid transparent;
+  transition: background var(--transition);
+  cursor: default;
+  contain: layout style;
+}
+.row:nth-child(even) { background: var(--bg-row-alt); }
+.row:hover           { background: var(--bg-row-hov); border-color: var(--border); }
+
+/* Level row tints */
+.row.lvl-error { background: var(--c-error-bg); }
+.row.lvl-warn  { background: var(--c-warn-bg); }
+
+/* Expanded rows grow to accommodate continuation */
+.row.has-cont { cursor: pointer; }
+.row.expanded { height: auto; overflow: visible; white-space: normal; }
+
+/* ── Columns ─────────────────────────────────────────────────────────────── */
+.col-ts  { color: var(--text-dim); min-width: 195px; margin-right: 8px; flex-shrink: 0; }
+.col-lvl { margin-right: 8px; flex-shrink: 0; }
+.col-cat { color: var(--accent); min-width: 100px; margin-right: 4px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; }
+.col-thr { color: var(--text-sec); margin-right: 8px; flex-shrink: 0; }
+.col-msg { color: var(--text-pri); flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.row.expanded .col-msg { white-space: pre-wrap; word-break: break-all; overflow: visible; }
+
+/* ── Level badges ────────────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 16px;
+  min-width: 46px;
+  text-align: center;
+}
+.badge.lvl-error { background: var(--c-error); color: #000; }
+.badge.lvl-warn  { background: var(--c-warn);  color: #000; }
+.badge.lvl-info  { background: var(--c-info);  color: #000; }
+.badge.lvl-debug { background: var(--border);  color: var(--text-pri); }
+.badge.lvl-trace { background: var(--bg-row-hov); color: var(--text-dim); }
+
+/* ── Expand button ───────────────────────────────────────────────────────── */
+.exp-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 0 3px;
+  margin-left: 4px;
+  vertical-align: middle;
+  line-height: 1;
+}
+.exp-btn:hover { background: none; color: var(--text-pri); }
+
+/* ── Continuation lines ──────────────────────────────────────────────────── */
+.continuation {
+  display: none;
+  width: 100%;
+  margin-top: 2px;
+  padding-left: 195px;  /* align with message column */
+  color: var(--text-sec);
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.row.expanded .continuation { display: block; }
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+#empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-dim);
+  pointer-events: none;
+  font-size: 13px;
+}
+#empty-state svg { opacity: 0.3; }
+#empty-state.hidden { display: none; }
+
+/* ── Separator ───────────────────────────────────────────────────────────── */
+.sep { width: 1px; height: 18px; background: var(--border); flex-shrink: 0; }
+
+/* ── Misc utilities ──────────────────────────────────────────────────────── */
+.spacer { flex: 1; }
+.ml-auto { margin-left: auto; }
+
+/* ── Scrollbar for Firefox ───────────────────────────────────────────────── */
+#grid-container { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
