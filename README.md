@@ -37,8 +37,8 @@ Stream, search, and filter `dcs.log` in your browser while DCS is running — ze
 
 ```powershell
 # 1. Clone / download this repository
-git clone https://github.com/BrunoRV/dcs-log-viewer.git
-cd "dcs-log-viewer"
+git clone https://github.com/BrunoRV/dcs-log-viewer-public.git
+cd "dcs-log-viewer-public"
 
 # 2. Install dependencies and run (uv creates the venv automatically)
 uv run python -m dcs_log_viewer.main
