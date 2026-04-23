@@ -47,7 +47,7 @@ uv run python -m dcs_log_viewer.main
 The app will print:
 
 ```
-🚀  DCS Log Viewer  →  http://127.0.0.1:8420
+[DCS Log Viewer] http://127.0.0.1:8420
 ```
 
 Open that URL in your browser.
@@ -86,13 +86,13 @@ uv run python -m dcs_log_viewer.main
 
 4. Click any row with a **▸** button to expand its stack trace / continuation lines.
 
-5. Use **↺ Reload** to re-read the file from the beginning (e.g. after DCS restarts).
+5. Use **Reload** to re-read the file from the beginning (e.g. after DCS restarts).
 
-6. **✕ Clear** removes all entries from the view without touching the file.
+6. **Clear** removes all entries from the view without touching the file.
 
 7. Toggle **Auto-scroll** to lock to the newest entries or freely scroll history.
 
-8. Click **☀ Light / 🌙 Dark** to switch themes. The choice is saved automatically.
+8. Click **Light / Dark** to switch themes. The choice is saved automatically.
 
 ---
 
