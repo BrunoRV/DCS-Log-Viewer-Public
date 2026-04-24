@@ -10,6 +10,10 @@ export const Bus = (() => {
     on(event, fn) {
       (_handlers[event] = _handlers[event] || []).push(fn);
     },
+    off(event, fn) {
+      if (!fn) { delete _handlers[event]; return; }
+      _handlers[event] = (_handlers[event] || []).filter(f => f !== fn);
+    },
     emit(event, payload) {
       (_handlers[event] || []).forEach(fn => fn(payload));
     },

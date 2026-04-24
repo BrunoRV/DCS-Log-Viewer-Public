@@ -50,3 +50,12 @@ coverage.xml
 
 # Log sample kept intentionally — do NOT ignore:
 !dcs.log.example
+
+# ── JavaScript ────────────────────────────────────────────────────────────────
+node_modules/
+.vitest/
+coverage-js/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+coverage/

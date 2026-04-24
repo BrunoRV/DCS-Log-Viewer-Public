@@ -140,23 +140,29 @@ uv run uvicorn dcs_log_viewer.main:app --reload --port 8420
 
 ## Testing
 
-The project uses `pytest` for unit and integration testing.
+### Python (pytest)
+The project uses `pytest` for Python unit and integration testing.
 
-### Running tests
 ```powershell
-uv run pytest
+# Run all Python tests
+uv run pytest tests/python
+
+# With coverage
+uv run pytest tests/python --cov=dcs_log_viewer
 ```
 
-### Coverage report
-To generate a coverage report in the terminal:
-```powershell
-uv run pytest --cov=dcs_log_viewer
-```
+### Frontend (JavaScript)
+We use [Vitest](https://vitest.dev/) for unit testing.
+- `npm test`: Run all JS tests.
+- `npm run test:coverage`: Run tests with coverage report.
 
-To generate an HTML coverage report:
+Our tests follow a **minimal dependency** philosophy, using manual DOM mocks to test UI logic (like virtual scrolling) without heavy simulations like JSDOM.
+
 ```powershell
-uv run pytest --cov=dcs_log_viewer --cov-report=html
-# Open htmlcov/index.html in your browser
+# Open coverage/index.html to see the visual report
+
+# Run JS tests in watch mode (recommended for development)
+npm run test:watch
 ```
 
 ---
