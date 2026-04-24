@@ -7,8 +7,9 @@
  *   store.reset()           — clear all entries
  *   store.filtered()        — return currently filtered + searched entries
  *   store.setSearch(text)   — update search string
+ *   store.setUseRegex(bool) — toggle regex search
  *   store.setLevels(arr)    — update level whitelist ([] = show all)
- *   store.setCategory(str)  — update category filter ('' = show all)
+ *   store.setEmitter(str)   — update emitter filter ('' = show all)
  *   store.getStats()        — { total, counts: {<level>: N, ...} }
  *   store.getLevels()       — ordered list of known levels
  */
@@ -35,28 +36,39 @@ export async function initLevels() {
 function makeStore() {
   let _entries  = [];   // all entries in the sliding window
   let _search   = '';
+  let _useRegex = false;
   let _levels   = [];   // [] means "all"
-  let _category = '';
+  let _emitter  = '';
 
   function _matches(entry) {
     // Level filter
     if (_levels.length > 0 && !_levels.includes(entry.level)) return false;
 
-    // Category filter
-    if (_category && entry.category !== _category) return false;
+    // Emitter filter
+    if (_emitter && entry.emitter !== _emitter) return false;
 
-    // Text search (case-insensitive across all visible fields)
+    // Text search
     if (_search) {
-      const needle = _search.toLowerCase();
       const haystack = [
         entry.timestamp,
         entry.level,
-        entry.category,
+        entry.emitter,
         entry.thread,
         entry.message,
         ...(entry.continuation || []),
-      ].join(' ').toLowerCase();
-      if (!haystack.includes(needle)) return false;
+      ].join(' ');
+
+      if (_useRegex) {
+        try {
+          const re = new RegExp(_search, 'i');
+          if (!re.test(haystack)) return false;
+        } catch (e) {
+          // Invalid regex, fallback to simple include
+          if (!haystack.toLowerCase().includes(_search.toLowerCase())) return false;
+        }
+      } else {
+        if (!haystack.toLowerCase().includes(_search.toLowerCase())) return false;
+      }
     }
 
     return true;
@@ -73,15 +85,16 @@ function makeStore() {
       return _entries.filter(_matches);
     },
     setSearch(text) { _search = text; },
+    setUseRegex(bool) { _useRegex = bool; },
     setLevels(arr)  { _levels = arr; },
-    setCategory(s)  { _category = s; },
+    setEmitter(s)   { _emitter = s; },
 
     getLevels() {
       return ALL_LEVELS;
     },
 
-    getCategories() {
-      const set = new Set(_entries.map(e => e.category));
+    getEmitters() {
+      const set = new Set(_entries.map(e => e.emitter));
       return [...set].sort();
     },
 

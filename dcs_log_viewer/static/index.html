@@ -51,14 +51,20 @@
   <!-- ── Filter toolbar ───────────────────────────────────────────────────── -->
   <div id="toolbar" role="toolbar" aria-label="Log filters">
     <!-- Text search -->
-    <input
-      type="text"
-      id="search-input"
-      placeholder="🔍 Search…"
-      aria-label="Search log entries"
-      autocomplete="off"
-      spellcheck="false"
-    />
+    <div class="search-container">
+      <input
+        type="text"
+        id="search-input"
+        placeholder="🔍 Search…"
+        aria-label="Search log entries"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <label class="regex-toggle" title="Use Regular Expression">
+        <input type="checkbox" id="regex-chk" />
+        <span>.*</span>
+      </label>
+    </div>
 
     <!-- Level filter pills -->
     <div class="level-pills" role="group" aria-label="Level filter">
@@ -86,9 +92,9 @@
 
     <div class="sep"></div>
 
-    <!-- Category filter -->
-    <select id="category-select" aria-label="Filter by category">
-      <option value="">All categories</option>
+    <!-- Emitter filter -->
+    <select id="emitter-select" aria-label="Filter by emitter">
+      <option value="">All emitters</option>
     </select>
 
     <div class="spacer"></div>
@@ -99,6 +105,14 @@
       <span class="toggle-track"></span>
       Auto-scroll
     </label>
+
+    <div class="sep"></div>
+
+    <!-- Window size -->
+    <div class="config-item">
+      <label for="window-input">Max Lines:</label>
+      <input type="number" id="window-input" value="1500" min="10" max="50000" step="100" />
+    </div>
 
     <div class="sep"></div>
 

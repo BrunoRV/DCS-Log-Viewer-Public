@@ -35,12 +35,12 @@ class LogTailer:
 
     Usage:
 
-        tailer = LogTailer(path, window_lines=1000)
+        tailer = LogTailer(path, window_lines=1500)
         async for batch in tailer.watch():
             send_to_clients(batch)
     """
 
-    def __init__(self, path: str | Path, window_lines: int = 1000) -> None:
+    def __init__(self, path: str | Path, window_lines: int = 1500) -> None:
         self.path = Path(path)
         self.window_lines = window_lines
         self._parser = LogParser()

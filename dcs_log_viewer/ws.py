@@ -87,7 +87,7 @@ async def start_watch(path: str) -> None:
         await broadcast({"type": "error", "message": f"File not found: {path}"})
         return
 
-    window_lines = _config.get("window_lines", 1000)
+    window_lines = _config.get("window_lines", 1500)
     _tailer = LogTailer(p, window_lines=window_lines)
 
     # Initial snapshot

@@ -13,20 +13,24 @@ from typing import Optional
 
 # ── Regex ──────────────────────────────────────────────────────────────────────
 # Matches: 2026-04-23 02:09:51.935 WARNING EDCORE (Main): hypervisor is active
+# Refined to support optional Emitter and Thread, and custom levels like ERROR_ONCE.
 LOG_RE = re.compile(
     r"^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)"
-    r"\s+(?P<level>ERROR|WARNING|WARN|INFO|DEBUG|TRACE)"
-    r"\s+(?P<category>\S+)"
-    r"\s+\((?P<thread>[^)]+)\):\s*"
-    r"(?P<message>.*)$"
+    r"\s+(?P<level>[A-Z_]+)"
+    r"\s+(?P<emitter>\S*)"
+    r"\s*\((?P<thread>[^)]*)\):"
+    r"\s*(?P<message>.*)$"
 )
 
 HEADER_RE = re.compile(r"^=== Log (opened|closed)")
 
-LEVELS = ("ERROR", "WARNING", "WARN", "INFO", "DEBUG", "TRACE")
+LEVELS = ("ERROR", "WARNING", "WARN", "ERROR_ONCE", "INFO", "DEBUG", "TRACE")
 
-# Normalise WARNING → WARN for consistent bucketing
-LEVEL_NORM = {"WARNING": "WARN"}
+# Normalise levels for consistent styling
+LEVEL_NORM = {
+    "WARNING": "WARN",
+    "ERROR_ONCE": "ERROR",
+}
 
 
 @dataclass
@@ -34,8 +38,8 @@ class LogEntry:
     id: int
     timestamp: str
     level: str           # ERROR / WARN / INFO / DEBUG / TRACE
-    category: str
-    thread: str
+    emitter: str         # Module/System (e.g. EDCORE)
+    thread: str          # Thread ID or name (e.g. Main)
     message: str
     continuation: list[str] = field(default_factory=list)
     raw: str = ""
@@ -45,7 +49,7 @@ class LogEntry:
             "id": self.id,
             "timestamp": self.timestamp,
             "level": self.level,
-            "category": self.category,
+            "emitter": self.emitter,
             "thread": self.thread,
             "message": self.message,
             "continuation": self.continuation,
@@ -87,7 +91,7 @@ class LogParser:
                 id=self._next_id(),
                 timestamp=m.group("timestamp"),
                 level=LEVEL_NORM.get(level_raw, level_raw),
-                category=m.group("category"),
+                emitter=m.group("emitter"),
                 thread=m.group("thread"),
                 message=m.group("message"),
                 raw=line,

@@ -18,8 +18,10 @@ const pathInput      = $('path-input');
 const browseBtn      = $('browse-btn');
 const pathBtn        = $('path-btn');
 const searchInput    = $('search-input');
+const regexChk       = $('regex-chk');
+const windowInput    = $('window-input');
 
-const categorySelect = $('category-select');
+const emitterSelect  = $('emitter-select');
 const clearBtn       = $('clear-btn');
 const reloadBtn      = $('reload-btn');
 const autoScrollChk  = $('autoscroll-chk');
@@ -51,7 +53,7 @@ function scheduleRender() {
     grid.render(entries);
     if (autoScroll) grid.scrollToBottom();
     updateStats();
-    updateCategoryOptions();
+    updateEmitterOptions();
     // Toggle empty state
     if (emptyState) emptyState.classList.toggle('hidden', entries.length > 0);
   });
@@ -65,20 +67,20 @@ function updateStats() {
   }
 }
 
-function updateCategoryOptions() {
-  if (!categorySelect) return;
-  const prev = categorySelect.value;
-  const cats = store.getCategories();
+function updateEmitterOptions() {
+  if (!emitterSelect) return;
+  const prev = emitterSelect.value;
+  const emis = store.getEmitters();
   // keep options in sync without full rebuild if possible
-  const existing = new Set([...categorySelect.options].map(o => o.value));
-  for (const cat of cats) {
-    if (!existing.has(cat)) {
+  const existing = new Set([...emitterSelect.options].map(o => o.value));
+  for (const emi of emis) {
+    if (!existing.has(emi)) {
       const opt = document.createElement('option');
-      opt.value = opt.textContent = cat;
-      categorySelect.appendChild(opt);
+      opt.value = opt.textContent = emi;
+      emitterSelect.appendChild(opt);
     }
   }
-  categorySelect.value = prev;
+  emitterSelect.value = prev;
 }
 
 // ── WebSocket events ──────────────────────────────────────────────────────────
@@ -98,6 +100,9 @@ Bus.on('config', ({ data }) => {
   if (data.auto_scroll !== undefined) {
     autoScroll = data.auto_scroll;
     autoScrollChk.checked = autoScroll;
+  }
+  if (data.window_lines !== undefined) {
+    windowInput.value = data.window_lines;
   }
 });
 
@@ -142,6 +147,11 @@ browseBtn.addEventListener('click', async () => {
   }
 });
 
+regexChk.addEventListener('change', () => {
+  store.setUseRegex(regexChk.checked);
+  scheduleRender();
+});
+
 pathBtn.addEventListener('click', () => {
   const p = pathInput.value.trim();
   if (p) send({ action: 'set_path', path: p });
@@ -165,14 +175,21 @@ document.querySelectorAll('.level-chk').forEach(chk => {
   });
 });
 
-categorySelect.addEventListener('change', () => {
-  store.setCategory(categorySelect.value);
+emitterSelect.addEventListener('change', () => {
+  store.setEmitter(emitterSelect.value);
   scheduleRender();
 });
 
 clearBtn.addEventListener('click', () => send({ action: 'clear' }));
 
 reloadBtn.addEventListener('click', () => send({ action: 'reload' }));
+
+windowInput.addEventListener('change', () => {
+  const val = parseInt(windowInput.value);
+  if (!isNaN(val) && val > 0) {
+    send({ action: 'set_config', window_lines: val });
+  }
+});
 
 autoScrollChk.addEventListener('change', () => {
   autoScroll = autoScrollChk.checked;

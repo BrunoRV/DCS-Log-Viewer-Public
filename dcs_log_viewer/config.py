@@ -17,7 +17,7 @@ APP_NAME = "dcs-log-viewer"
 DEFAULT_CONFIG: dict[str, Any] = {
     "log_path": str(Path.home() / "Saved Games" / "DCS" / "Logs" / "dcs.log"),
     "theme": "dark",
-    "window_lines": 1000,
+    "window_lines": 1500,
     "auto_scroll": True,
     "level_filter": [],          # empty = show all
     "search_text": "",
