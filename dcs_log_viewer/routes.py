@@ -70,8 +70,6 @@ async def get_levels() -> dict:
 
 # ── File browser ──────────────────────────────────────────────────────────────
 
-# ── File browser ──────────────────────────────────────────────────────────────
-
 @router.get("/api/browse")
 async def browse_file():
     """Open a native file-picker dialog and return the selected path.
@@ -127,15 +125,15 @@ async def _browse_macos(initial_dir: Path) -> str:
 async def _browse_windows(initial_dir: Path) -> str:
     """Use an isolated Python subprocess to run Tkinter (safe and clean)."""
     import sys
-    # We use a raw string for the path and escape single quotes.
-    safe_path = str(initial_dir).replace("'", "\\'")
+    # We use repr() to ensure the path is correctly escaped for a Python string literal.
+    safe_path_repr = repr(str(initial_dir))
     snippet = (
         "import tkinter as tk; "
         "from tkinter import filedialog; "
         "root = tk.Tk(); "
         "root.withdraw(); "
         "root.attributes('-topmost', True); "
-        f"path = filedialog.askopenfilename(title='Select dcs.log', initialdir='{safe_path}', "
+        f"path = filedialog.askopenfilename(title='Select dcs.log', initialdir={safe_path_repr}, "
         "filetypes=[('Log files', '*.log'), ('All files', '*.*')]); "
         "print(path, end=''); "
         "root.destroy()"
