@@ -21,6 +21,7 @@ Stream, search, and filter `dcs.log` in your browser while DCS is running — ze
 | **Full-text search** | Instant client-side search across all fields |
 | **Auto-scroll** | Follows the tail automatically; pauses when you scroll up |
 | **Dark / Light theme** | Toggled from the UI; persisted across sessions |
+| **Syntax Highlighting** | Automatic highlighting of paths, IPs, URLs, brackets, braces, and method calls |
 | **Config persistence** | Log path + preferences saved to `%APPDATA%\dcs-log-viewer\config.json` |
 | **Log rotation** | Detects truncation / inode change and re-reads from the beginning |
 
@@ -114,6 +115,8 @@ dcs-log-viewer/
 │           ├── ws.js        ← WebSocket client + event bus
 │           ├── filters.js   ← In-memory store + filter/search engine
 │           ├── grid.js      ← Virtual-scroll log grid renderer
+│           ├── highlighter.js ← Generic syntax highlighting engine
+│           ├── highlighter_dcs.js ← DCS-specific rules and instance
 │           └── app.js       ← Main orchestrator, UI wiring
 ├── pyproject.toml
 ├── .gitignore

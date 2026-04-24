@@ -9,6 +9,8 @@
  *   Binary search is used to find visible rows in O(log N).
  */
 
+import { dcsHighlighter } from './highlighter_dcs.js';
+
 const ROW_HEIGHT   = 22;    // px — must match CSS .row height
 const OVERSCAN     = 30;    // extra rows above/below viewport
 
@@ -33,7 +35,7 @@ function buildRowHtml(entry, top, isExpanded) {
 
   // Continuation lines are embedded and shown if expanded
   const contHtml = (hasCont && isExpanded)
-    ? `<div class="continuation">${entry.continuation.map(l => `<div>${escHtml(l)}</div>`).join('')}</div>`
+    ? `<div class="continuation">${entry.continuation.map(l => `<div>${dcsHighlighter.highlight(l)}</div>`).join('')}</div>`
     : '';
 
   if (entry.emitter === undefined) console.warn('[grid] emitter is undefined for entry', entry);
@@ -44,7 +46,7 @@ function buildRowHtml(entry, top, isExpanded) {
   <span class="col-lvl"><span class="badge ${lc}">${escHtml(entry.level)}</span></span>
   <span class="col-emi">${escHtml(entry.emitter || '')}</span>
   <span class="col-thr">(${escHtml(entry.thread)})</span>
-  <span class="col-msg">${escHtml(entry.message)}${hasCont ? `<button class="exp-btn" aria-label="expand">${isExpanded ? '▾' : '▸'}</button>` : ''}</span>
+  <span class="col-msg">${dcsHighlighter.highlight(entry.message)}${hasCont ? `<button class="exp-btn" aria-label="expand">${isExpanded ? '▾' : '▸'}</button>` : ''}</span>
   ${contHtml}
 </div>`;
 }

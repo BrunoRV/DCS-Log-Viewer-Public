@@ -41,6 +41,14 @@
   --c-trace   : #4a5168;
   --c-trace-bg: transparent;
 
+  /* Highlights - Dark */
+  --hl-link   : #58b4ff;
+  --hl-bracket: #ffba5a;
+  --hl-brace  : #bd93f9;
+  --hl-member : #50fa7b;
+  --hl-string : #f1fa8c;
+  --hl-path   : #8be9fd;
+
   --row-height: 22px;
   --radius    : 6px;
   --radius-sm : 4px;
@@ -65,6 +73,15 @@
   --c-error-bg: rgba(255,95,110,0.08);
   --c-warn-bg : rgba(255,186,90,0.08);
   --c-info-bg : transparent;
+
+  /* Highlights - Light */
+  --hl-link   : #0066cc;
+  --hl-bracket: #995500;
+  --hl-brace  : #6600cc;
+  --hl-member : #008800;
+  --hl-string : #aa8800;
+  --hl-path   : #007777;
+
   --shadow    : 0 2px 8px rgba(0,0,0,0.10);
 }
 
@@ -423,6 +440,24 @@ button.danger:hover  { border-color: var(--c-error); color: var(--c-error); }
   word-break: break-all;
 }
 .row.expanded .continuation { display: block; }
+
+/* ── Syntax Highlighting ─────────────────────────────────────────────────── */
+.hl-link {
+  color: var(--hl-link);
+  text-decoration: underline;
+  text-decoration-color: rgba(255,255,255,0.1);
+  cursor: pointer;
+  transition: text-decoration-color var(--transition);
+}
+.hl-link:hover {
+  text-decoration-color: var(--hl-link);
+}
+
+.hl-bracket  { color: var(--hl-bracket); }
+.hl-brace    { color: var(--hl-brace); }
+.hl-member   { color: var(--hl-member); font-weight: 600; }
+.hl-string   { color: var(--hl-string); }
+.hl-path-rel { color: var(--hl-path); font-style: italic; }
 
 /* ── Empty state ─────────────────────────────────────────────────────────── */
 #empty-state {
