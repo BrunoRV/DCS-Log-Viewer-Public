@@ -21,6 +21,9 @@ const LEVEL_CLASS = {
   DEBUG: 'lvl-debug',
   TRACE: 'lvl-trace',
 };
+ 
+const ICON_COPY = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
+const ICON_CHECK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 
 function escHtml(s) {
   return String(s)
@@ -47,6 +50,11 @@ function buildRowHtml(entry, top, isExpanded) {
   <span class="col-emi">${escHtml(entry.emitter || '')}</span>
   <span class="col-thr">(${escHtml(entry.thread)})</span>
   <span class="col-msg">${dcsHighlighter.highlight(entry.message)}${hasCont ? `<button class="exp-btn" aria-label="expand">${isExpanded ? '▾' : '▸'}</button>` : ''}</span>
+  <div class="row-actions">
+    <button class="copy-btn" title="Copy entry" aria-label="copy entry" data-id="${entry.id}">
+      ${ICON_COPY}
+    </button>
+  </div>
   ${contHtml}
 </div>`;
 }
@@ -84,8 +92,28 @@ export function createGrid(container) {
     spacer.style.height = `${top}px`;
   }
 
-  // ── Delegation: expand/collapse continuation on button click ──────────────
+  // ── Delegation: expand/collapse or copy ──────────────────────────────────
   rowsEl.addEventListener('click', e => {
+    // 1. Copy button
+    const copyBtn = e.target.closest('.copy-btn');
+    if (copyBtn) {
+      e.stopPropagation();
+      const id = parseInt(copyBtn.dataset.id);
+      const entry = _entries.find(ent => ent.id === id);
+      if (entry && entry.raw) {
+        navigator.clipboard.writeText(entry.raw).then(() => {
+          copyBtn.innerHTML = ICON_CHECK;
+          copyBtn.classList.add('success');
+          setTimeout(() => {
+            copyBtn.innerHTML = ICON_COPY;
+            copyBtn.classList.remove('success');
+          }, 1500);
+        });
+      }
+      return;
+    }
+
+    // 2. Expand button
     const btn = e.target.closest('.exp-btn');
     if (!btn) return;
     const row = btn.closest('.row');

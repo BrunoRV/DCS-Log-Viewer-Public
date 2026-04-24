@@ -427,6 +427,51 @@ button.danger:hover  { border-color: var(--c-error); color: var(--c-error); }
   line-height: 1;
 }
 .exp-btn:hover { background: none; color: var(--text-pri); }
+ 
+/* ── Row actions (Floating Copy) ─────────────────────────────────────────── */
+.row-actions {
+  position: absolute;
+  right: 12px;
+  top: 0;
+  height: var(--row-height);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity var(--transition);
+  z-index: 10;
+  pointer-events: none;
+}
+.row:hover .row-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+ 
+.copy-btn {
+  background: var(--bg-panel);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-sec);
+  padding: 2px;
+  width: 24px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: var(--shadow);
+}
+.copy-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--bg-row-hov);
+}
+.copy-btn.success {
+  color: #50fa7b;
+  border-color: #50fa7b;
+}
 
 /* ── Continuation lines ──────────────────────────────────────────────────── */
 .continuation {

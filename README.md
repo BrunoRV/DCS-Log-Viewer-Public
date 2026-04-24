@@ -20,6 +20,7 @@ Stream, search, and filter `dcs.log` in your browser while DCS is running — ze
 | **Category filter** | Drop-down populated from live log data |
 | **Full-text search** | Instant client-side search across all fields |
 | **Auto-scroll** | Follows the tail automatically; pauses when you scroll up |
+| **Copy to Clipboard** | One-click copy for log entries (including full stack traces) |
 | **Dark / Light theme** | Toggled from the UI; persisted across sessions |
 | **Syntax Highlighting** | Automatic highlighting of paths, IPs, URLs, brackets, braces, and method calls |
 | **Config persistence** | Log path + preferences saved to `%APPDATA%\dcs-log-viewer\config.json` |

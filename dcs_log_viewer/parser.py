@@ -53,6 +53,7 @@ class LogEntry:
             "thread": self.thread,
             "message": self.message,
             "continuation": self.continuation,
+            "raw": self.raw,
         }
 
 
@@ -101,6 +102,7 @@ class LogParser:
             # Continuation / indented line
             if self._pending is not None:
                 self._pending.continuation.append(line)
+                self._pending.raw += "\n" + line
             return None
 
     def flush(self) -> Optional[LogEntry]:

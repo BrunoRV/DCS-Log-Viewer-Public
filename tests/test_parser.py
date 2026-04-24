@@ -23,6 +23,7 @@ def test_continuation_parsing():
     entries = parse_lines(lines)
     assert len(entries) == 1
     assert entries[0].continuation == ["    more info line 1", "    more info line 2"]
+    assert entries[0].raw == "2026-04-23 23:10:52.872 INFO    VISUALIZER (17652): Start\n    more info line 1\n    more info line 2"
 
 def test_level_normalization():
     """Verify that non-standard levels (WARNING, ERROR_ONCE) are mapped to canonical levels."""
@@ -102,7 +103,7 @@ def test_parser_reset():
     assert last is None
 
 def test_log_entry_to_dict():
-    """Verify that LogEntry serialization excludes internal 'raw' data."""
+    """Verify that LogEntry serialization includes 'raw' data for frontend copy support."""
     entry = LogEntry(
         id=1,
         timestamp="2026-04-23 23:10:52.872",
@@ -116,4 +117,4 @@ def test_log_entry_to_dict():
     d = entry.to_dict()
     assert d["id"] == 1
     assert d["timestamp"] == "2026-04-23 23:10:52.872"
-    assert "raw" not in d # raw should be excluded from to_dict for frontend
+    assert d["raw"] == "RAW"
