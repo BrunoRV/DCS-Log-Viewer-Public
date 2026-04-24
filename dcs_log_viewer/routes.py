@@ -70,23 +70,113 @@ async def get_levels() -> dict:
 
 # ── File browser ──────────────────────────────────────────────────────────────
 
+# ── File browser ──────────────────────────────────────────────────────────────
+
 @router.get("/api/browse")
 async def browse_file():
-    """Open a native file-picker dialog and return the selected path."""
-    import tkinter as tk
-    from tkinter import filedialog
+    """Open a native file-picker dialog and return the selected path.
 
-    def _open_dialog():
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes("-topmost", True)
-        file_path = filedialog.askopenfilename(
-            title="Select dcs.log",
-            filetypes=[("Log files", "*.log"), ("All files", "*.*")],
-            initialdir=str(Path.home() / "Saved Games" / "DCS" / "Logs"),
-        )
-        root.destroy()
-        return file_path
+    Uses platform-specific subprocesses to avoid blocking the event loop or
+    violating GUI thread constraints (especially on macOS).
+    """
+    import sys
+    import platform
+    from pathlib import Path
 
-    path = await asyncio.to_thread(_open_dialog)
+    initial_dir = Path.home() / "Saved Games" / "DCS" / "Logs"
+    if not initial_dir.exists():
+        initial_dir = Path.home()
+
+    system = platform.system()
+
+    try:
+        if system == "Darwin":
+            path = await _browse_macos(initial_dir)
+        elif system == "Windows":
+            path = await _browse_windows(initial_dir)
+        else:  # Linux / Others
+            path = await _browse_linux(initial_dir)
+    except Exception as e:
+        log.error(f"Failed to open file browser: {e}")
+        path = ""
+
     return {"path": path}
+
+
+async def _browse_macos(initial_dir: Path) -> str:
+    """Use AppleScript for a native macOS dialog (safe from any thread)."""
+    # Escaping for AppleScript: we use POSIX file for the default location.
+    script = f'''
+        try
+            set defaultPath to POSIX file "{initial_dir}"
+            set theFile to choose file with prompt "Select dcs.log" of type {{"log", "txt"}} default location defaultPath
+            return POSIX path of theFile
+        on error
+            return ""
+        end try
+    '''
+    proc = await asyncio.create_subprocess_exec(
+        "osascript", "-e", script,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+    stdout, _ = await proc.communicate()
+    return stdout.decode().strip()
+
+
+async def _browse_windows(initial_dir: Path) -> str:
+    """Use an isolated Python subprocess to run Tkinter (safe and clean)."""
+    import sys
+    # We use a raw string for the path and escape single quotes.
+    safe_path = str(initial_dir).replace("'", "\\'")
+    snippet = (
+        "import tkinter as tk; "
+        "from tkinter import filedialog; "
+        "root = tk.Tk(); "
+        "root.withdraw(); "
+        "root.attributes('-topmost', True); "
+        f"path = filedialog.askopenfilename(title='Select dcs.log', initialdir='{safe_path}', "
+        "filetypes=[('Log files', '*.log'), ('All files', '*.*')]); "
+        "print(path, end=''); "
+        "root.destroy()"
+    )
+    proc = await asyncio.create_subprocess_exec(
+        sys.executable, "-c", snippet,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+    stdout, _ = await proc.communicate()
+    return stdout.decode().strip()
+
+
+async def _browse_linux(initial_dir: Path) -> str:
+    """Try zenity or kdialog, falling back to a Tkinter subprocess."""
+    # 1. Zenity (GNOME/Common)
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "zenity", "--file-selection", "--title=Select dcs.log",
+            f"--filename={initial_dir}/",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, _ = await proc.communicate()
+        if proc.returncode == 0:
+            return stdout.decode().strip()
+    except Exception:
+        pass
+
+    # 2. kdialog (KDE)
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "kdialog", "--getopenfilename", str(initial_dir), "*.log|Log files",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout, _ = await proc.communicate()
+        if proc.returncode == 0:
+            return stdout.decode().strip()
+    except Exception:
+        pass
+
+    # 3. Fallback to Tkinter subprocess (reuse Windows logic)
+    return await _browse_windows(initial_dir)

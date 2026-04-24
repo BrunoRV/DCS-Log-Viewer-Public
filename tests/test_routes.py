@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 from dcs_log_viewer.main import app
 from dcs_log_viewer.parser import LEVELS
 
@@ -45,22 +45,27 @@ def test_post_config(mock_save, mock_get):
     assert data["new_key"] == 123
     mock_save.assert_called_once()
 
-@patch("tkinter.Tk")
-@patch("tkinter.filedialog.askopenfilename")
-def test_browse_file_logic(mock_ask, mock_tk_class):
-    """Verify the internal _open_dialog logic by mocking tkinter directly."""
-    # This tests the logic inside browse_file by calling the internal function
-    # or by letting the endpoint call it but mocking the UI parts.
+@patch("asyncio.create_subprocess_exec")
+@patch("platform.system")
+def test_browse_file_logic(mock_system, mock_exec):
+    """Verify that /api/browse uses the correct platform-specific subprocess."""
     
-    mock_tk = MagicMock()
-    mock_tk_class.return_value = mock_tk
-    mock_ask.return_value = "C:/mocked/dcs.log"
+    # 1. Test macOS (Darwin)
+    mock_system.return_value = "Darwin"
+    mock_proc = MagicMock()
+    mock_proc.communicate = AsyncMock(return_value=(b"/Users/test/dcs.log\n", b""))
+    mock_exec.return_value = mock_proc
     
     response = client.get("/api/browse")
     assert response.status_code == 200
-    assert response.json() == {"path": "C:/mocked/dcs.log"}
+    assert response.json() == {"path": "/Users/test/dcs.log"}
+    assert "osascript" in mock_exec.call_args[0]
+
+    # 2. Test Windows
+    mock_system.return_value = "Windows"
+    mock_proc.communicate = AsyncMock(return_value=(b"C:\\Games\\DCS\\dcs.log", b""))
     
-    # Verify tkinter was used correctly
-    mock_tk.withdraw.assert_called_once()
-    mock_tk.destroy.assert_called_once()
-    mock_ask.assert_called_once()
+    response = client.get("/api/browse")
+    assert response.json() == {"path": "C:\\Games\\DCS\\dcs.log"}
+    # Should call python executable
+    assert any("import tkinter" in arg for arg in mock_exec.call_args[0])
