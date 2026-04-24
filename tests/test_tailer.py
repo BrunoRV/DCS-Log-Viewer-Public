@@ -2,6 +2,7 @@ import asyncio
 import pytest
 import os
 from pathlib import Path
+from unittest.mock import patch, MagicMock, AsyncMock
 from dcs_log_viewer.tailer import LogTailer
 
 @pytest.mark.asyncio
@@ -115,3 +116,61 @@ async def test_read_incomplete_line(tmp_path):
     assert len(entries) == 1
     assert entries[0].message == "Incomplete line"
     assert tailer._offset > old_offset
+
+def test_tailer_window_property(tmp_path):
+    """Verify the window property returns the current buffer."""
+    log_file = tmp_path / "dcs.log"
+    log_file.write_text("", encoding="utf-8")
+    tailer = LogTailer(log_file)
+    assert tailer.window == []
+
+@pytest.mark.asyncio
+async def test_watch_missing_file_initially(tmp_path):
+    """Verify that watch() yields nothing and can be stopped if the file doesn't exist."""
+    tailer = LogTailer(tmp_path / "missing.log")
+    
+    async def run_watch():
+        async for _ in tailer.watch():
+            pass
+
+    task = asyncio.create_task(run_watch())
+    await asyncio.sleep(0.1) # Let it run a bit
+    tailer.stop()
+    await task # Should finish now
+
+@pytest.mark.asyncio
+async def test_tailer_io_errors(tmp_path):
+    """Verify that LogTailer handles PermissionError and OSError gracefully during reads."""
+    log_file = tmp_path / "dcs.log"
+    log_file.write_text("data\n", encoding="utf-8")
+    tailer = LogTailer(log_file)
+    
+    # Mock aiofiles.open to throw PermissionError
+    with patch("aiofiles.open", side_effect=PermissionError("Locked")):
+        entries = await tailer._read_new_entries()
+        assert entries == []
+        
+    # Mock aiofiles.open to throw OSError
+    with patch("aiofiles.open", side_effect=OSError("Disk failure")):
+        entries = await tailer._read_new_entries()
+        assert entries == []
+
+@pytest.mark.asyncio
+async def test_watch_loop_stat_error(tmp_path):
+    """Verify that the watch loop handles OSError during stat() gracefully."""
+    log_file = tmp_path / "dcs.log"
+    log_file.write_text("data\n", encoding="utf-8")
+    tailer = LogTailer(log_file)
+    
+    # Mock path.stat to fail
+    with patch.object(Path, "stat", side_effect=OSError("Transient failure")):
+        # We only want to run one cycle of the loop
+        async def run_once():
+            async for _ in tailer.watch():
+                pass
+        
+        task = asyncio.create_task(run_once())
+        await asyncio.sleep(0.3) # Wait for a few poll cycles
+        tailer.stop()
+        await task
+        # If we reached here without hanging or crashing, success

@@ -45,11 +45,22 @@ def test_post_config(mock_save, mock_get):
     assert data["new_key"] == 123
     mock_save.assert_called_once()
 
-@patch("dcs_log_viewer.routes.asyncio.to_thread")
-def test_browse_file(mock_to_thread):
-    """Verify that the /api/browse endpoint correctly proxies the native file-picker."""
-    # Mocking the async call that opens the dialog
-    mock_to_thread.return_value = "C:/mocked/dcs.log"
+@patch("tkinter.Tk")
+@patch("tkinter.filedialog.askopenfilename")
+def test_browse_file_logic(mock_ask, mock_tk_class):
+    """Verify the internal _open_dialog logic by mocking tkinter directly."""
+    # This tests the logic inside browse_file by calling the internal function
+    # or by letting the endpoint call it but mocking the UI parts.
+    
+    mock_tk = MagicMock()
+    mock_tk_class.return_value = mock_tk
+    mock_ask.return_value = "C:/mocked/dcs.log"
+    
     response = client.get("/api/browse")
     assert response.status_code == 200
     assert response.json() == {"path": "C:/mocked/dcs.log"}
+    
+    # Verify tkinter was used correctly
+    mock_tk.withdraw.assert_called_once()
+    mock_tk.destroy.assert_called_once()
+    mock_ask.assert_called_once()

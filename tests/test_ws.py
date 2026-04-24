@@ -150,3 +150,16 @@ async def test_watcher_loop_error(mock_exists, mock_tailer_class):
         # Should have broadcasted the error
         any_error = any(call[0][0].get("type") == "error" for call in mock_broadcast.call_args_list)
         assert any_error
+
+def test_ws_config_helpers():
+    """Verify the module-level config accessors."""
+    cfg = {"test": 123}
+    ws_module.set_config(cfg)
+    assert ws_module.get_config() == cfg
+
+def test_websocket_auto_start_on_connect():
+    """Verify that the watcher starts immediately if a path is already configured."""
+    ws_module._config = {"log_path": "auto.log"}
+    with patch("dcs_log_viewer.ws.start_watch", new_callable=AsyncMock) as mock_start:
+        with client.websocket_connect("/ws"):
+            mock_start.assert_called_with("auto.log")

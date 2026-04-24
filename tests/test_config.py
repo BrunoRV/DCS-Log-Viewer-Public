@@ -1,5 +1,6 @@
 import json
 import pytest
+import os
 from pathlib import Path
 from dcs_log_viewer.config import load_config, save_config, DEFAULT_CONFIG
 
@@ -57,3 +58,14 @@ def test_config_merging(tmp_path, monkeypatch):
     cfg = load_config()
     assert cfg["theme"] == "light"
     assert cfg["window_lines"] == DEFAULT_CONFIG["window_lines"]
+
+def test_config_dir_linux(tmp_path, monkeypatch):
+    """Verify that config directory logic correctly handles Linux paths when mocked."""
+    # We mock platform and env, but we mock mkdir so it doesn't actually try to create /tmp on Windows
+    monkeypatch.setattr("dcs_log_viewer.config.platform.system", lambda: "Linux")
+    fake_config = tmp_path / "xdg_config"
+    monkeypatch.setitem(os.environ, "XDG_CONFIG_HOME", str(fake_config))
+    
+    from dcs_log_viewer.config import _config_dir
+    d = _config_dir()
+    assert str(d).startswith(str(fake_config))

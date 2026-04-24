@@ -80,10 +80,10 @@ class LogTailer:
         while not self._stop_event.is_set():
             await asyncio.sleep(_POLL_INTERVAL)
 
-            if not self.path.exists():
-                continue
-
             try:
+                if not self.path.exists():
+                    continue
+
                 stat = self.path.stat()
                 current_inode = stat.st_ino
 
