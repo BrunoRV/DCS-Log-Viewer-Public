@@ -125,13 +125,35 @@ dcs-log-viewer/
 ## Development
 
 ```powershell
-# Install with dev extras (adds uvicorn reload)
+# Install with dev extras (adds uvicorn reload + testing tools)
 uv sync
 
 # Run with auto-reload on source changes
 uv run uvicorn dcs_log_viewer.main:app --reload --port 8420
 ```
 
+---
+
+## Testing
+
+The project uses `pytest` for unit and integration testing.
+
+### Running tests
+```powershell
+uv run pytest
+```
+
+### Coverage report
+To generate a coverage report in the terminal:
+```powershell
+uv run pytest --cov=dcs_log_viewer
+```
+
+To generate an HTML coverage report:
+```powershell
+uv run pytest --cov=dcs_log_viewer --cov-report=html
+# Open htmlcov/index.html in your browser
+```
 
 ---
 

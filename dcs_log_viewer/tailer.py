@@ -126,13 +126,22 @@ class LogTailer:
             async with aiofiles.open(self.path, "rb") as fh:
                 await fh.seek(self._offset)
                 raw = await fh.read()
-                self._offset += len(raw)
 
             if not raw:
                 return entries
 
+            # Only consume up to the last newline to avoid parsing partial lines
+            last_nl = raw.rfind(b"\n")
+            if last_nl == -1:
+                # No newline found — don't advance offset, wait for more data
+                return entries
+
+            # Advance offset only for the complete lines
+            to_parse = raw[: last_nl + 1]
+            self._offset += len(to_parse)
+
             # Decode robustly — DCS writes in UTF-8 but may have invalid bytes
-            text = raw.decode("utf-8", errors="replace")
+            text = to_parse.decode("utf-8", errors="replace")
             reader = io.StringIO(text)
 
             for line in reader:
@@ -140,14 +149,10 @@ class LogTailer:
                 if entry:
                     entries.append(entry)
 
-            # Flush the last pending entry only when we hit EOF cleanly
-            # (i.e., the last read ended on a newline boundary)
-            if text.endswith("\n"):
-                last = self._parser.flush()
-                if last:
-                    entries.append(last)
-                    # Re-prime so flush doesn't double-emit
-                    self._parser._pending = None  # noqa: SLF001
+            # Flush the last pending entry
+            last = self._parser.flush()
+            if last:
+                entries.append(last)
 
         except PermissionError as exc:
             # File is locked exclusively by DCS — transient, just skip this cycle

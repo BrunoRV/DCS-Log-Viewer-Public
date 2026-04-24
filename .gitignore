@@ -39,5 +39,14 @@ dcs.log
 # User config persisted by the app at runtime
 config.json
 
+# ── Testing ───────────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
 # Log sample kept intentionally — do NOT ignore:
 !dcs.log.example
