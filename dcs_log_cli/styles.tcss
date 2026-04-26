@@ -24,11 +24,11 @@ Screen {
 }
 
 #search-container {
-    height: 3;
+    height: auto;
     dock: bottom;
     background: $boost;
-    border-top: inner $primary;
-    padding: 0 1;
+    border-top: tall $primary;
+    padding: 0 1 1 1; /* Space on left, right, and bottom */
     display: none;
 }
 

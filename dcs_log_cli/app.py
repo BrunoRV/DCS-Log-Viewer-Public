@@ -40,17 +40,23 @@ class DCSLogApp(App):
 
     CSS_PATH = "styles.tcss"
     BINDINGS = [
-        Binding("q", "quit", "Quit"),
+        Binding("q", "quit_app", "Quit"),
         Binding("f2", "toggle_sidebar", "Filters"),
         Binding("/", "focus_search", "Search"),
         Binding("escape", "clear_filters", "Clear Filters"),
         Binding("ctrl+l", "clear_log", "Clear Log"),
-        Binding("up", "scroll_up", "Scroll Up", show=False),
-        Binding("down", "scroll_down", "Scroll Down", show=False),
-        Binding("pageup", "page_up", "Page Up", show=False),
-        Binding("pagedown", "page_down", "Page Down", show=False),
-        Binding("home", "scroll_home", "Scroll Home", show=False),
-        Binding("end", "scroll_end", "Scroll End", show=False),
+        Binding("up", "scroll_up", "Up", show=True),
+        Binding("k", "scroll_up", "Up", show=False),
+        Binding("down", "scroll_down", "Down", show=True),
+        Binding("j", "scroll_down", "Down", show=False),
+        Binding("pageup", "page_up", "PgUp", show=True),
+        Binding("ctrl+u", "page_up", "PgUp", show=False),
+        Binding("pagedown", "page_down", "PgDn", show=True),
+        Binding("ctrl+d", "page_down", "PgDn", show=False),
+        Binding("home", "scroll_home", "Home", show=True),
+        Binding("g", "scroll_home", "Home", show=False),
+        Binding("end", "scroll_end", "End", show=True),
+        Binding("G", "scroll_end", "End", show=False),
         Binding("s", "toggle_autoscroll", "Auto-scroll"),
     ]
 
@@ -159,25 +165,42 @@ class DCSLogApp(App):
             
         return text
 
+    def action_quit_app(self) -> None:
+        if isinstance(self.focused, Input):
+            return
+        self.exit()
+
     def action_scroll_up(self) -> None:
+        if isinstance(self.focused, Input):
+            return
         self.auto_scroll = False
         self.log_view.scroll_relative(y=-1)
 
     def action_scroll_down(self) -> None:
+        if isinstance(self.focused, Input):
+            return
         self.log_view.scroll_relative(y=1)
 
     def action_page_up(self) -> None:
+        if isinstance(self.focused, Input):
+            return
         self.auto_scroll = False
         self.log_view.scroll_page_up()
 
     def action_page_down(self) -> None:
+        if isinstance(self.focused, Input):
+            return
         self.log_view.scroll_page_down()
 
     def action_scroll_home(self) -> None:
+        if isinstance(self.focused, Input):
+            return
         self.auto_scroll = False
         self.log_view.scroll_home()
 
     def action_scroll_end(self) -> None:
+        if isinstance(self.focused, Input):
+            return
         self.log_view.scroll_end()
 
     def action_toggle_autoscroll(self) -> None:
@@ -225,8 +248,10 @@ class DCSLogApp(App):
         self._show_search = True
         container = self.query_one("#search-container")
         container.set_class(True, "-visible")
-        # Focusing after a refresh helps when containers are being made visible
-        self.call_after_refresh(self.query_one("#search-input").focus)
+        search_input = self.query_one("#search-input")
+        search_input.focus()
+        # Ensure it stays focused
+        self.set_timer(0.1, search_input.focus)
 
     def action_clear_filters(self) -> None:
         self.store.set_search("")
@@ -252,8 +277,8 @@ class DCSLogApp(App):
 
     @on(Input.Changed, "#search-input")
     def on_search_changed(self, event: Input.Changed) -> None:
-        # Live search disabled for performance on large logs
-        pass
+        self.store.set_search(event.value)
+        self.refresh_logs()
 
     @on(ListView.Selected, "#level-list")
     def on_level_selected(self, event: ListView.Selected) -> None:

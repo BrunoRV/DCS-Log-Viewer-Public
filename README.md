@@ -56,6 +56,9 @@ uv run dcs-log-cli <PATH_TO_DCS_LOG>
 - **F2**: Toggle Sidebar (Level/Emitter Filters)
 - **/**: Global Search
 - **Up/Down/PgUp/PgDn/Home/End**: Navigation
+- **j / k**: Scroll Down / Up (Vi-style)
+- **ctrl+d / ctrl+u**: Page Down / Up (Vi-style)
+- **g / G**: Jump to Top / Bottom (Vi-style)
 - **S**: Toggle Auto-scroll
 - **Esc**: Clear Filters
 - **Ctrl+L**: Clear Log View
