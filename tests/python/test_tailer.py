@@ -3,7 +3,7 @@ import pytest
 import os
 from pathlib import Path
 from unittest.mock import patch, MagicMock, AsyncMock
-from dcs_log_viewer.tailer import LogTailer
+from dcs_log_core.tailer import LogTailer
 
 @pytest.mark.asyncio
 async def test_initial_load(tmp_path):

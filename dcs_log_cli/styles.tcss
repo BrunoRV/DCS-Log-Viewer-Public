@@ -1,0 +1,78 @@
+/* btop-inspired styling for DCS Log CLI */
+
+Screen {
+    background: $surface;
+    color: $text;
+}
+
+#sidebar {
+    width: 30;
+    dock: left;
+    background: $boost;
+    border-right: tall $primary;
+    padding: 1;
+    display: none; /* Hidden by default, toggled with F2 or Tab */
+}
+
+#sidebar.-visible {
+    display: block;
+}
+
+#log-container {
+    width: 1fr;
+    height: 1fr;
+}
+
+#search-container {
+    height: 3;
+    dock: bottom;
+    background: $boost;
+    border-top: inner $primary;
+    padding: 0 1;
+    display: none;
+}
+
+#search-container.-visible {
+    display: block;
+}
+
+#search-input:focus {
+    border: tall $accent;
+    background: $surface;
+}
+
+/* Log Level Colors */
+.level-ERROR { color: #ff5555; text-style: bold; }
+.level-WARN { color: #f1fa8c; text-style: bold; }
+.level-INFO { color: #50fa7b; }
+.level-DEBUG { color: #8be9fd; }
+.level-TRACE { color: #6272a4; }
+
+/* Message Highlighting */
+.log-link { color: #bd93f9; text-style: underline; }
+.log-bracket { color: #ffb86c; }
+.log-brace { color: #ff79c6; }
+.log-member { color: #8be9fd; text-style: italic; }
+.log-string { color: #f1fa8c; }
+
+/* Header & Footer */
+Header {
+    background: $primary;
+    color: $text;
+    text-style: bold;
+}
+
+Footer {
+    background: $boost;
+}
+
+/* Sidebar Widgets */
+Label {
+    margin-top: 1;
+    text-style: bold;
+}
+
+#emitter-list {
+    height: 1fr;
+    border: solid $primary;
+}

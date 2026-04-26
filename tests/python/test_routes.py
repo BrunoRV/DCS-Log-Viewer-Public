@@ -1,8 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock, AsyncMock
-from dcs_log_viewer.main import app
-from dcs_log_viewer.parser import LEVELS
+from dcs_log_web.main import app
+from dcs_log_core.parser import LEVELS
 
 client = TestClient(app)
 
@@ -24,7 +24,7 @@ def test_get_levels():
     assert "ERROR" in data["levels"]
     assert "WARNING" not in data["levels"]
 
-@patch("dcs_log_viewer.ws.get_config")
+@patch("dcs_log_web.ws.get_config")
 def test_get_config(mock_get_config):
     """Verify that /api/config correctly retrieves the current application state."""
     mock_get_config.return_value = {"theme": "dark", "log_path": "test.log"}
@@ -32,8 +32,8 @@ def test_get_config(mock_get_config):
     assert response.status_code == 200
     assert response.json() == {"theme": "dark", "log_path": "test.log"}
 
-@patch("dcs_log_viewer.ws.get_config")
-@patch("dcs_log_viewer.routes.save_config")
+@patch("dcs_log_web.ws.get_config")
+@patch("dcs_log_web.routes.save_config")
 def test_post_config(mock_save, mock_get):
     """Verify that POSTing to /api/config updates the state and persists it to disk."""
     mock_get.return_value = {"theme": "dark"}

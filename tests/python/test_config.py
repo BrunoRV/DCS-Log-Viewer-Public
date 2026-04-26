@@ -2,13 +2,13 @@ import json
 import pytest
 import os
 from pathlib import Path
-from dcs_log_viewer.config import load_config, save_config, DEFAULT_CONFIG
+from dcs_log_core.config import load_config, save_config, DEFAULT_CONFIG
 
 def test_load_default_config(tmp_path, monkeypatch):
     """Verify that load_config() returns DEFAULT_CONFIG when no file exists."""
     # Mock config_path to a temp file
     cfg_file = tmp_path / "config.json"
-    monkeypatch.setattr("dcs_log_viewer.config.config_path", lambda: cfg_file)
+    monkeypatch.setattr("dcs_log_core.config.config_path", lambda: cfg_file)
     
     # When file doesn't exist, should return default config
     cfg = load_config()
@@ -17,7 +17,7 @@ def test_load_default_config(tmp_path, monkeypatch):
 def test_save_and_load_config(tmp_path, monkeypatch):
     """Verify that configuration can be persisted to disk and reloaded correctly."""
     cfg_file = tmp_path / "config.json"
-    monkeypatch.setattr("dcs_log_viewer.config.config_path", lambda: cfg_file)
+    monkeypatch.setattr("dcs_log_core.config.config_path", lambda: cfg_file)
     
     custom_cfg = DEFAULT_CONFIG.copy()
     custom_cfg["theme"] = "light"
@@ -37,7 +37,7 @@ def test_save_and_load_config(tmp_path, monkeypatch):
 def test_load_corrupt_config(tmp_path, monkeypatch):
     """Verify that load_config() falls back to defaults if the JSON file is malformed."""
     cfg_file = tmp_path / "config.json"
-    monkeypatch.setattr("dcs_log_viewer.config.config_path", lambda: cfg_file)
+    monkeypatch.setattr("dcs_log_core.config.config_path", lambda: cfg_file)
     
     # Write invalid JSON
     cfg_file.write_text("{invalid json", encoding="utf-8")
@@ -49,7 +49,7 @@ def test_load_corrupt_config(tmp_path, monkeypatch):
 def test_config_merging(tmp_path, monkeypatch):
     """Verify that partial config files are merged with DEFAULT_CONFIG."""
     cfg_file = tmp_path / "config.json"
-    monkeypatch.setattr("dcs_log_viewer.config.config_path", lambda: cfg_file)
+    monkeypatch.setattr("dcs_log_core.config.config_path", lambda: cfg_file)
     
     # Write config with only one key
     cfg_file.write_text(json.dumps({"theme": "light"}), encoding="utf-8")
@@ -62,10 +62,10 @@ def test_config_merging(tmp_path, monkeypatch):
 def test_config_dir_linux(tmp_path, monkeypatch):
     """Verify that config directory logic correctly handles Linux paths when mocked."""
     # We mock platform and env, but we mock mkdir so it doesn't actually try to create /tmp on Windows
-    monkeypatch.setattr("dcs_log_viewer.config.platform.system", lambda: "Linux")
+    monkeypatch.setattr("dcs_log_core.config.platform.system", lambda: "Linux")
     fake_config = tmp_path / "xdg_config"
     monkeypatch.setitem(os.environ, "XDG_CONFIG_HOME", str(fake_config))
     
-    from dcs_log_viewer.config import _config_dir
+    from dcs_log_core.config import _config_dir
     d = _config_dir()
     assert str(d).startswith(str(fake_config))

@@ -28,8 +28,8 @@ from typing import Optional
 
 from fastapi import WebSocket, WebSocketDisconnect
 
-from .config import save_config
-from .tailer import LogTailer
+from dcs_log_core.config import save_config
+from dcs_log_core.tailer import LogTailer
 
 log = logging.getLogger(__name__)
 

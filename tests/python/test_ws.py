@@ -4,8 +4,8 @@ import asyncio
 from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi.testclient import TestClient
 from fastapi import WebSocketDisconnect
-from dcs_log_viewer.main import app
-import dcs_log_viewer.ws as ws_module
+from dcs_log_web.main import app
+import dcs_log_web.ws as ws_module
 
 client = TestClient(app)
 
@@ -55,7 +55,7 @@ async def test_websocket_actions():
     ws_module._config = {"log_path": "", "window_lines": 100}
     
     # We use a patch on start_watch to avoid actual tailing logic
-    with patch("dcs_log_viewer.ws.start_watch", new_callable=AsyncMock) as mock_start:
+    with patch("dcs_log_web.ws.start_watch", new_callable=AsyncMock) as mock_start:
         with client.websocket_connect("/ws") as websocket:
             websocket.receive_json() # ignore initial config
             
@@ -78,7 +78,7 @@ async def test_websocket_actions():
             assert mock_start.call_count >= 3
             
             # Test clear
-            with patch("dcs_log_viewer.ws.broadcast", new_callable=AsyncMock) as mock_broadcast:
+            with patch("dcs_log_web.ws.broadcast", new_callable=AsyncMock) as mock_broadcast:
                 websocket.send_json({"action": "clear"})
                 await asyncio.sleep(0.1)
                 mock_broadcast.assert_called_with({"type": "clear"})
@@ -92,8 +92,8 @@ def test_websocket_invalid_json():
         assert len(ws_module._clients) == 1
 
 @pytest.mark.asyncio
-@patch("dcs_log_viewer.ws.LogTailer")
-@patch("dcs_log_viewer.ws.Path.exists")
+@patch("dcs_log_web.ws.LogTailer")
+@patch("dcs_log_web.ws.Path.exists")
 async def test_start_watch_lifecycle(mock_exists, mock_tailer_class):
     """Verify that starting a new watch correctly cancels any existing watch tasks."""
     mock_exists.return_value = True
@@ -117,8 +117,8 @@ async def test_start_watch_lifecycle(mock_exists, mock_tailer_class):
     assert task1.done()
 
 @pytest.mark.asyncio
-@patch("dcs_log_viewer.ws.broadcast", new_callable=AsyncMock)
-@patch("dcs_log_viewer.ws.Path.exists")
+@patch("dcs_log_web.ws.broadcast", new_callable=AsyncMock)
+@patch("dcs_log_web.ws.Path.exists")
 async def test_start_watch_file_not_found(mock_exists, mock_broadcast):
     """Verify that the server broadcasts an error if the requested log file does not exist."""
     mock_exists.return_value = False
@@ -127,8 +127,8 @@ async def test_start_watch_file_not_found(mock_exists, mock_broadcast):
     assert "File not found" in mock_broadcast.call_args[0][0]["message"]
 
 @pytest.mark.asyncio
-@patch("dcs_log_viewer.ws.LogTailer")
-@patch("dcs_log_viewer.ws.Path.exists")
+@patch("dcs_log_web.ws.LogTailer")
+@patch("dcs_log_web.ws.Path.exists")
 async def test_watcher_loop_error(mock_exists, mock_tailer_class):
     """Verify that watcher crashes are caught and broadcasted to clients."""
     mock_exists.return_value = True
@@ -142,7 +142,7 @@ async def test_watcher_loop_error(mock_exists, mock_tailer_class):
     
     mock_tailer.watch.return_value = error_iter()
     
-    with patch("dcs_log_viewer.ws.broadcast", new_callable=AsyncMock) as mock_broadcast:
+    with patch("dcs_log_web.ws.broadcast", new_callable=AsyncMock) as mock_broadcast:
         await ws_module.start_watch("crash.log")
         # Wait for the task to run and crash
         await asyncio.sleep(0.1)
@@ -160,6 +160,6 @@ def test_ws_config_helpers():
 def test_websocket_auto_start_on_connect():
     """Verify that the watcher starts immediately if a path is already configured."""
     ws_module._config = {"log_path": "auto.log"}
-    with patch("dcs_log_viewer.ws.start_watch", new_callable=AsyncMock) as mock_start:
+    with patch("dcs_log_web.ws.start_watch", new_callable=AsyncMock) as mock_start:
         with client.websocket_connect("/ws"):
             mock_start.assert_called_with("auto.log")

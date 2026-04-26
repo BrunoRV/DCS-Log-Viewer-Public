@@ -1,5 +1,5 @@
 import pytest
-from dcs_log_viewer.parser import LogParser, parse_lines, LogEntry
+from dcs_log_core.parser import LogParser, parse_lines, LogEntry
 
 def test_basic_parsing():
     """Verify that a standard DCS log line is correctly parsed into structured fields."""

@@ -33,7 +33,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from .config import load_config
+from dcs_log_core.config import load_config
 from . import ws as ws_state
 from .routes import router
 from .ws import websocket_endpoint
@@ -76,7 +76,7 @@ def main() -> None:
     print(f"\n[DCS Log Viewer] http://{host}:{port}\n")
 
     uvicorn.run(
-        "dcs_log_viewer.main:app",
+        "dcs_log_web.main:app",
         host=host,
         port=port,
         log_level=log_level,

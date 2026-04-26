@@ -17,8 +17,8 @@ from pathlib import Path
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
-from .config import save_config
-from .parser import LEVELS
+from dcs_log_core.config import save_config
+from dcs_log_core.parser import LEVELS
 from . import ws as ws_state
 
 log = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ async def get_levels() -> dict:
     Normalised levels only (WARNING is collapsed to WARN on ingest),
     so the client sees exactly what appears in ``entry.level``.
     """
-    from .parser import LEVEL_NORM
+    from dcs_log_core.parser import LEVEL_NORM
     normalised = list(dict.fromkeys(          # preserve order, deduplicate
         LEVEL_NORM.get(lvl, lvl) for lvl in LEVELS
     ))
