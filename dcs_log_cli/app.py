@@ -118,8 +118,8 @@ class DCSLogApp(App):
     async def watch_logs(self) -> None:
         async for batch in self.tailer.watch():
             self.store.add(batch)
-            self.call_from_thread(self.refresh_logs, is_append=True)
-            self.call_from_thread(self.refresh_sidebar)
+            self.refresh_logs(is_append=True)
+            self.refresh_sidebar()
 
     def refresh_logs(self, is_append: bool = False) -> None:
         """Update the log display based on filtered entries."""
